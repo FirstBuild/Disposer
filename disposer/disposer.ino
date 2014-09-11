@@ -41,6 +41,8 @@ static const uint8_t BUTTON = 1;
 
 unsigned long start_single_tap_millis = 0;
 int lastButtonState = LOW;
+int blueValue = 0;
+boolean blueDirectionForward = true;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(1, PIXEL_CONTROL, NEO_GRB + NEO_KHZ800);
 
@@ -134,8 +136,6 @@ void stateOffExit()
 void stateOffTappedEnter()
 {
   start_single_tap_millis = millis();
-  strip.setPixelColor(0, strip.Color(  241,   92, 34));
-  strip.show();
 }
 
 void stateOffTappedUpdate()
@@ -156,7 +156,27 @@ void stateOffTappedUpdate()
   }
   else
   {
-    //do nothing, chilling for another button change
+     if(blueValue==255)
+     {
+       blueDirectionForward==false;
+     } 
+     else if (blueValue==0)
+     {
+       blueDirectionForward==true;
+     }
+     
+     if (blueDirectionForward==true)
+     {
+       blueValue++;
+     }
+     else
+     {
+       blueValue--;
+     }
+     
+     strip.setPixelColor(0, strip.Color(  0,   0, blueValue));
+     strip.show();
+     delay(3);
   }
 }  
 
