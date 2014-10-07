@@ -25,7 +25,7 @@
 #include <FiniteStateMachine.h>
 #include <Adafruit_NeoPixel.h>
 
-#define WAIT_FOR_SECOND_TOUCH 3500
+#define WAIT_FOR_SECOND_TOUCH 4700
 
 //state machine setup 
 State stateOn = State(stateOnEnter, stateOnUpdate, stateOnExit);
@@ -158,11 +158,11 @@ void stateOffTappedUpdate()
   {
      if(blueValue==255)
      {
-       blueDirectionForward==false;
+       blueDirectionForward=false;
      } 
      else if (blueValue==0)
      {
-       blueDirectionForward==true;
+       blueDirectionForward=true;
      }
      
      if (blueDirectionForward==true)
