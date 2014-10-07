@@ -26,10 +26,12 @@
 #include <Adafruit_NeoPixel.h>
 
 #define WAIT_FOR_SECOND_TOUCH 4700
+#define WAIT_FOR_TIMEOUT 20000
+#define WAIT_COMPLETED_INDICATOR 5000
 
 //state machine setup 
 State stateOn = State(stateOnEnter, stateOnUpdate, stateOnExit);
-State stateOnSteady = State(stateOnSteadyEnter, stateOnSteadyUpdate, stateOnSteadyExit);
+State stateOffCompleted = State(stateOffCompletedEnter, stateOffCompletedUpdate,stateOffCompletedExit);
 State stateOff = State(stateOffEnter, stateOffUpdate, stateOffExit);
 State stateOffTapped = State(stateOffTappedEnter, stateOffTappedUpdate, stateOffTappedExit);
 FSM bpStateMachine = FSM(stateOff);     
@@ -39,6 +41,8 @@ static const uint8_t VALVE_RELAY = 2;
 static const uint8_t PIXEL_CONTROL = 4;
 static const uint8_t BUTTON = 1;
 
+unsigned long start_completed_indicator_timer_millis = 0;
+unsigned long start_completed_timer_millis = 0;
 unsigned long start_single_tap_millis = 0;
 int lastButtonState = LOW;
 int blueValue = 0;
@@ -67,17 +71,25 @@ void stateOnEnter()
 { 
   digitalWrite(DISPOSER_RELAY, HIGH);
   digitalWrite(VALVE_RELAY, HIGH);
-  strip.setPixelColor(0, strip.Color(  0,   0, 127));
+  strip.setPixelColor(0, strip.Color(  0,   0, 255));
   strip.show();
+  
+  start_completed_timer_millis = millis();
 }
 
 void stateOnUpdate()
 {
+  unsigned long current_millis = millis();
   int currentButtonState = digitalRead(BUTTON);
+  
   if (currentButtonState != lastButtonState)
   {
     bpStateMachine.transitionTo(stateOff);
-  } 
+  }
+  else if ( current_millis - start_completed_timer_millis > WAIT_FOR_TIMEOUT )
+  {
+    bpStateMachine.transitionTo(stateOffCompleted);
+  }
 }
 
 void stateOnExit()
@@ -85,17 +97,29 @@ void stateOnExit()
 }
 
 //------------------------------------------
-// stateOnSteady - NOT IMPLEMENTED YET
+// stateOffCompleted
 //------------------------------------------
-void stateOnSteadyEnter()
+void stateOffCompletedEnter()
 { 
+  start_completed_indicator_timer_millis = millis();
+  
+  digitalWrite(DISPOSER_RELAY, LOW);
+  digitalWrite(VALVE_RELAY, LOW);
+  
+  strip.setPixelColor(0, strip.Color(  0,   255, 0));
+  strip.show();
 }
 
-void stateOnSteadyUpdate()
-{ 
+void stateOffCompletedUpdate()
+{
+  unsigned long current_millis = millis();
+  if ( current_millis - start_completed_indicator_timer_millis > WAIT_COMPLETED_INDICATOR )
+  {
+    bpStateMachine.transitionTo(stateOff);
+  } 
 }
 
-void stateOnSteadyExit()
+void stateOffCompletedExit()
 { 
 }
 
