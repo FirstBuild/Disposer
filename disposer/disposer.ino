@@ -23,7 +23,7 @@
 
 
 #include <FiniteStateMachine.h>
-#include <Adafruit_NeoPixel.h>
+//#include <Adafruit_NeoPixel.h>
 
 #define WAIT_FOR_SECOND_TOUCH 4700
 #define WAIT_FOR_TIMEOUT 20000
@@ -38,8 +38,10 @@ FSM bpStateMachine = FSM(stateOff);
 
 static const uint8_t DISPOSER_RELAY = 0;
 static const uint8_t VALVE_RELAY = 2;
-static const uint8_t PIXEL_CONTROL = 4;
+static const uint8_t GREEN_LED = 4;
+static const uint8_t BLUE_LED = 5;
 static const uint8_t BUTTON = 1;
+//static const uint8_t WATCH_DOG = 3;
 
 unsigned long start_completed_indicator_timer_millis = 0;
 unsigned long start_completed_timer_millis = 0;
@@ -48,16 +50,19 @@ int lastButtonState = LOW;
 int blueValue = 0;
 boolean blueDirectionForward = true;
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(1, PIXEL_CONTROL, NEO_GRB + NEO_KHZ800);
+//Adafruit_NeoPixel strip = Adafruit_NeoPixel(1, PIXEL_CONTROL, NEO_GRB + NEO_KHZ800);
 
 void setup() { 
   pinMode(BUTTON, INPUT);
   pinMode(VALVE_RELAY, OUTPUT);
-  pinMode(PIXEL_CONTROL, OUTPUT);
+//  pinMode(PIXEL_CONTROL, OUTPUT);
   pinMode(DISPOSER_RELAY, OUTPUT);
+  pinMode(BLUE_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
+  
   bpStateMachine.transitionTo(stateOff);
-  strip.begin();
-  strip.show();         
+//  strip.begin();
+//  strip.show();         
 }
 
 void loop(){
@@ -71,8 +76,10 @@ void stateOnEnter()
 { 
   digitalWrite(DISPOSER_RELAY, HIGH);
   digitalWrite(VALVE_RELAY, HIGH);
-  strip.setPixelColor(0, strip.Color(  0,   0, 255));
-  strip.show();
+  analogWrite(BLUE_LED, 255);
+  
+//  strip.setPixelColor(0, strip.Color(  0,   0, 255));
+//  strip.show();
   
   start_completed_timer_millis = millis();
 }
@@ -105,9 +112,10 @@ void stateOffCompletedEnter()
   
   digitalWrite(DISPOSER_RELAY, LOW);
   digitalWrite(VALVE_RELAY, LOW);
+  digitalWrite(GREEN_LED, HIGH);
   
-  strip.setPixelColor(0, strip.Color(  0,   255, 0));
-  strip.show();
+//  strip.setPixelColor(0, strip.Color(  0,   255, 0));
+//  strip.show();
 }
 
 void stateOffCompletedUpdate()
@@ -135,8 +143,11 @@ void stateOffEnter()
   // get the current state of the button to detect changes
   lastButtonState = digitalRead(BUTTON);
   
-  strip.setPixelColor(0, 0);
-  strip.show();
+  digitalWrite(GREEN_LED, LOW);
+  analogWrite(BLUE_LED, 0);
+  
+//  strip.setPixelColor(0, 0);
+//  strip.show();
 }
 
 void stateOffUpdate()
@@ -198,8 +209,9 @@ void stateOffTappedUpdate()
        blueValue--;
      }
      
-     strip.setPixelColor(0, strip.Color(  0,   0, blueValue));
-     strip.show();
+     analogWrite(BLUE_LED, blueValue);
+//     strip.setPixelColor(0, strip.Color(  0,   0, blueValue));
+//     strip.show();
      delay(3);
   }
 }  
