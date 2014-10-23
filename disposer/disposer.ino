@@ -41,7 +41,7 @@ static const uint8_t VALVE_RELAY = 2;
 static const uint8_t GREEN_LED = 5;
 static const uint8_t BLUE_LED = 4;
 static const uint8_t BUTTON = 1;
-//static const uint8_t WATCH_DOG = 3;
+static const uint8_t WATCH_DOG = 3;
 
 unsigned long start_completed_indicator_timer_millis = 0;
 unsigned long start_completed_timer_millis = 0;
@@ -49,6 +49,7 @@ unsigned long start_single_tap_millis = 0;
 int lastButtonState = LOW;
 int blueValue = 0;
 boolean blueDirectionForward = true;
+boolean dogbark = true;
 
 //Adafruit_NeoPixel strip = Adafruit_NeoPixel(1, PIXEL_CONTROL, NEO_GRB + NEO_KHZ800);
 
@@ -59,6 +60,7 @@ void setup() {
   pinMode(DISPOSER_RELAY, OUTPUT);
   pinMode(BLUE_LED, OUTPUT);
   pinMode(GREEN_LED, OUTPUT);
+  pinMode(WATCH_DOG, OUTPUT);
   
   bpStateMachine.transitionTo(stateOff);
 //  strip.begin();
@@ -77,6 +79,7 @@ void stateOnEnter()
   digitalWrite(DISPOSER_RELAY, HIGH);
   digitalWrite(VALVE_RELAY, HIGH);
   analogWrite(BLUE_LED, 255);
+  digitalWrite(WATCH_DOG, HIGH);
   
 //  strip.setPixelColor(0, strip.Color(  0,   0, 255));
 //  strip.show();
@@ -89,6 +92,17 @@ void stateOnUpdate()
   unsigned long current_millis = millis();
   int currentButtonState = digitalRead(BUTTON);
   
+  if (dogbark == true)
+  {
+    dogbark = false;
+    digitalWrite(WATCH_DOG, LOW);
+  }
+  else 
+  {
+    dogbark = true;
+    digitalWrite(WATCH_DOG, HIGH);
+  }
+  
   if (currentButtonState != lastButtonState)
   {
     bpStateMachine.transitionTo(stateOff);
@@ -96,7 +110,8 @@ void stateOnUpdate()
   else if ( current_millis - start_completed_timer_millis > WAIT_FOR_TIMEOUT )
   {
     bpStateMachine.transitionTo(stateOffCompleted);
-  }
+  }  
+  
 }
 
 void stateOnExit()
@@ -114,6 +129,7 @@ void stateOffCompletedEnter()
   digitalWrite(VALVE_RELAY, LOW);
   digitalWrite(GREEN_LED, HIGH);
   analogWrite(BLUE_LED, 0);
+  digitalWrite(WATCH_DOG, LOW);
   
 //  strip.setPixelColor(0, strip.Color(  0,   255, 0));
 //  strip.show();
