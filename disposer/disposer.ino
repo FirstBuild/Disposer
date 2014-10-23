@@ -38,8 +38,8 @@ FSM bpStateMachine = FSM(stateOff);
 
 static const uint8_t DISPOSER_RELAY = 0;
 static const uint8_t VALVE_RELAY = 2;
-static const uint8_t GREEN_LED = 4;
-static const uint8_t BLUE_LED = 5;
+static const uint8_t GREEN_LED = 5;
+static const uint8_t BLUE_LED = 4;
 static const uint8_t BUTTON = 1;
 //static const uint8_t WATCH_DOG = 3;
 
@@ -113,6 +113,7 @@ void stateOffCompletedEnter()
   digitalWrite(DISPOSER_RELAY, LOW);
   digitalWrite(VALVE_RELAY, LOW);
   digitalWrite(GREEN_LED, HIGH);
+  analogWrite(BLUE_LED, 0);
   
 //  strip.setPixelColor(0, strip.Color(  0,   255, 0));
 //  strip.show();
